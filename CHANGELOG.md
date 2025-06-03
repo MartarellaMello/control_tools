@@ -1,31 +1,27 @@
 # Changelog
+[0.2.1] - Corrections to fundamental class functions [2024-06-07]
 
-## [0.2.1] - Fixes on fundamental class functions [2024-06-07]
+## 1.1 Corrections -- Function utils
+- Refinement of the ft_n and ft_t functions to correct errors with transfer functions with conincident roots;
+- The ft_t function now uses control.info["FT"] directly, which corrects the problem of not calculating the points
+of the graph for those with the same root solution.
 
-
-### 1.1 Fixes -- Utils Functions
-- Refectory of ft_n and ft_t functions to fixes bugs with transfer functions with
-conincidentes roots;
-- The ft_t function now uses directelly the control.info["FT"], thats fixes the problem to dondo calculate 
-the points of the plot for who has the same roots solution.
 
 ### 1.2 Fixed -- Control Class
-- Some class properties were not being updated correctly, now they are working as expected;
-- Reanme of function call. Controle.time_function is now control.f_time;
-- Bugs fixes for Controle.info is now working as expected;
-- Better parameter of plots and colors
-
+- Some properties of the class were not being updated correctly, now they are working as expected;
+- Reanimate the function call. Control.time_function is now control.f_time;
+- Bug fixes for Control.info is now working as expected;
+- Improved graphics and colors parameters
 ### 1.3  Other Minor Changes
-- Some several changes in the documentation to make it more clear;
-- Riability improvements in the code plus estability improvements.
+- Some changes to the documentation to make it clearer;
+- Reliability improvements to the code and stability improvements.
 
 ### 1.4 Future Improvements
-- Add tests exemples to the documentation;
-- Impruve plot options and controls;
-- Documentation exemples and updates;
+- Add test examples to the documentation;
+- Impruve plotting options and controls;
+- Documentation examples and updates;
 
 ### Thanks
-- I apreciate the feedback and suggestions from the community, which have been invaluable in improving this package. 
-If you have any further suggestions or issues, please feel free to open an issue on the GitHub repository.
-- Please if you have any suggestion, issue or bug report pleas send my an email: d2020001214@unifei.edu.br
-
+- I would like to thank the community for their feedback and suggestions, which have been invaluable in improving
+this package. If you have any other suggestions or problems, feel free to open an issue in the GitHub repository.
+- If you have any suggestions, problems or bug reports, please send me an e-mail: d2020001214@unifei.edu.br
