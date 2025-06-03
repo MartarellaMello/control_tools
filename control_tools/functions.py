@@ -135,21 +135,26 @@ def locus_root(funcao_transferecia, plot=False) -> tuple:
     coef = get_coef(funcao_transferecia)
 
     margin = np.sqrt(sum(coef[1]))  # Adjust as needed
-    x_min = min(real_parts) - margin
-    x_max = max(real_parts) + margin
-    y_min = min(imag_parts) - margin
-    y_max = max(imag_parts) + margin
+    x_min = margin - margin
+    x_max = margin
+    y_min = - margin
+    y_max = 1
 
-    ft_control = control.TransferFunction(n, d)
+
+    # Verifica se o coeficiente é vazio ou nulo
+    if not coef or coef[0] == 0 or coef[1] == 0:
+        warnings.warn("A funcao de transferencia G(s) nao pode ser zero")
+        return None
+
+    # Cria a funcao de transferencia usando a biblioteca control
+    ft_control = control.TransferFunction(coef[0], coef[1])
     print(f"Função de transferência: {ft_control}")
     # Plote o root locus
     if plot:
-        rlist, klist = control.root_locus(ft_control, plot=True)
+        rlist, klist = control.root_locus(ft_control, plot=True, xlim=(x_min, x_max), ylim=(y_min, y_max))
         plt.title("Lugar das raízes (Root Locus)")
         plt.xlabel("Parte Real")
         plt.ylabel("Parte Imaginária")
-        plt.xlim(x_min, x_max)
-        plt.ylim(y_min, y_max)
         plt.grid(True)
         plt.show()
     else:

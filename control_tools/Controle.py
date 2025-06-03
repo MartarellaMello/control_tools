@@ -71,10 +71,11 @@ class Controle:
         self.info["H_s"] = self.info["Hs"]
         return h_s
 
-    def close_loop(self, h_s=1 / s, plot=False):
+    def close_loop(self, h_s=1/s, plot=False):
         """
         Calcula o sistema de controle em malha fechada
         :param plot: Plota o grafico do sistema de controle em malha fechada
+        :param h_s: Funcao de controlador.
         :return: Retorna a funcao de transferencia do sistema de controle em malha fechada
         """
         s = sp.Symbol('s')
