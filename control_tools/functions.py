@@ -3,15 +3,14 @@
 Principais funcooes para problemas de controle
 
 """
+from os import times, times_result
+
 import sympy as sp
 import numpy as np
 import matplotlib.pyplot as plt
 import warnings
 import sympy as sp
-import pydevd_pycharm
 import control
-import scipy
-import scipy.special
 
 def ft_s(numerador, denominador):
     # Variaveis simbolicas
@@ -81,7 +80,7 @@ def select(conds, choices, default=None):
     return out
 
 
-def ft_t(funcao_transferencia, inicio=5, final=5, dt=550, plot=False):
+def ft_t(funcao_transferencia, inicio=0, final=5, dt=200, plot=True):
     """
     :param funcao_transferencia: A funcao de transferencia G(s) em symbol
     :param inicio: O tempo de inicio da construcao do grafico
@@ -94,31 +93,37 @@ def ft_t(funcao_transferencia, inicio=5, final=5, dt=550, plot=False):
     t = sp.Symbol('t')
     s = sp.Symbol('s')
     ft_n = sp.inverse_laplace_transform(funcao_transferencia, s ,t)
-    #ft_n = sp.lambdify(t, ft_n, modules=[{"DiracDelta": dirac_delta,
-    #                                     "select": select}, 'numpy', 'scipy'])
-    ft_n = sp.lambdify(t, ft_n, modules=['scipy'])
+    time_values = np.linspace((inicio, final), dt, dtype=np.complex128)
+    y = []
+    x = []
 
-    time_values = np.linspace(inicio, final, dt, dtype=np.complex128)
-    y = ft_n(time_values)
+    for i in time_values:
+        comp = i[0] + i[1]
+        y.append(ft_n.subs(t, comp))
+        x.append(i)
+
+    print(len(y))
+    print(f"valores de y(t) da funcao F(s) = {ft_n}, implementados com sucesso")
+
+
 
     if plot:
-        plt.plot(time_values, y)
+        axis_size = x, y
+        plt.plot(x, y, label=f'g(t) = {ft_n}')
         plt.xlabel('Tempo (s)')
         plt.ylabel('g(t)')
         plt.title(f'Funcao {funcao_transferencia}')
         plt.grid(True)
         plt.show()
     else:
-        return y
+        return time_values, y
+
     return time_values, y
 
-
-def locus_root(coefs, plot=False, xaxis_size=(-15, 5), yaxis_size=(-9, 9)) -> tuple:
+def locus_root(funcao_transferecia, plot=False) -> tuple:
     """
     Retorna o grafico do lugar das raizews para um funcao de transfecnia conhecida
     :param coefs: Coeficientes da  Funcao de transferencia. Deve ser no do tipo tupla ou lista
-    :param xaxis_size: Determina o tamanho do eixo x
-    :param yaxis_size: Determina o tamanho do eixo y
     :return: None
     """
 
@@ -127,9 +132,15 @@ def locus_root(coefs, plot=False, xaxis_size=(-15, 5), yaxis_size=(-9, 9)) -> tu
     s = sp.symbols('s')
     # Simplifique e separe numerador e denominador
     # Calculo do lugar das raizes
+    coef = get_coef(funcao_transferecia)
 
-    ft_control = control.TransferFunction(coefs[0], coefs[1])
+    margin = np.sqrt(sum(coef[1]))  # Adjust as needed
+    x_min = min(real_parts) - margin
+    x_max = max(real_parts) + margin
+    y_min = min(imag_parts) - margin
+    y_max = max(imag_parts) + margin
 
+    ft_control = control.TransferFunction(n, d)
     print(f"Função de transferência: {ft_control}")
     # Plote o root locus
     if plot:
@@ -137,15 +148,15 @@ def locus_root(coefs, plot=False, xaxis_size=(-15, 5), yaxis_size=(-9, 9)) -> tu
         plt.title("Lugar das raízes (Root Locus)")
         plt.xlabel("Parte Real")
         plt.ylabel("Parte Imaginária")
-        plt.xlim(xaxis_size)
-        plt.ylim(yaxis_size)
-
+        plt.xlim(x_min, x_max)
+        plt.ylim(y_min, y_max)
         plt.grid(True)
         plt.show()
     else:
         rlist, klist = control.root_locus(ft_control, plot=False)
 
     return rlist, klist
+
 
 
 class Controle:
@@ -175,39 +186,42 @@ class Controle:
     def info(self):
         return self._ft
 
+    @property
+    def view(self):
+        txt = self.info["FT"]
+        print("LaTex", sp.latex(txt))
 
-    def time_function(self, plot=False):
+    def time_f(self, plot=True):
         ft = self.info["FT"]
         ft_n = ft_t(ft, 0, 50, plot)
+        self.info["f_time"] = ft_n
         return ft_n
 
 
     def lugar_raizes(self, plot=False):
-        coefs = list(ft.info["Numerador"], ft.info["Denominador"])
-        r, k = locus_root(coefs, plot)
+        r, k = locus_root(self.info["FT"], plot)
         return r, k
 
-    def step(self):
+    def step(self, plot=False):
         s = sp.Symbol("s")
         self.info["FT"] = self.info["FT"] * (s ** (-1))
 
-        ft_t  = self.time_function()
-        ft_root =  self.ft.lugar_raizes()
-        self.info["Time_Ans"] = ft_t
+        ft_t  = self.time_f(plot)
+        ft_root =  self.lugar_raizes(plot)
+        self.info["step_Ans"] = ft_t
         self.info["Root_locus"] = ft_root
 
         return self.info
 
 if __name__ == '__main__':
     n = (1, 4)
-    d = (1, 5, 3, 2)
+    d = (1, 5, 2)
 
     ft = Controle(n, d)
-    ft.time_function()
-    ft.lugar_raizes()
+    ft.time_f()
+    ft.lugar_raizes(plot=True)
+    ft.step(plot=True)
+   # teste = ft.step()
 
-    teste = ft.step()
 
-    a = 2 + 3
-
-    ft.time_function()
+   # ft.time_function()
