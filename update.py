@@ -2,22 +2,43 @@
 File to made updates to the database.
 
 """
+
 import subprocess
 
+
 if __name__ == "__main__":
-    commands = []
+    print("Selecione uma das opcoes de atualizacao abaixo:\n"
+          "1 - Atualizar git hub padrao (git push origin main)\n")
+    print("2 - Acessar diretamente o terminal e inserir os comandos manualmente\n"
+          "0 - Para sair a qualquer momento do programa. . .\n")
+    commands = 7
     print("Programa em execucao, digite 0 para sair")
-    i = 1
-    while i != "0":
+    while commands != "0":
+
         commands = input("Codigos para execucao: ").split("&&")
-        for cmd in commands:
-            cmd = cmd.strip()
-            if cmd:
-                res = subprocess.run(cmd, capture_output=True, shell=True, text=True)
-                print(f"${cmd}")
-                print(res.stdout)
-                if res.stderr:
-                    print(res.stderr)
-        if i == commands and i == 0:
+
+        if commands[0] == "1":
+            commands = str("git add .\n"
+                           "git commit -m 'Mensagem personalizada'\n"
+                           "git push origin main").split("&&")
+            for cmd in commands:
+                cmd = cmd.strip()
+                if cmd:
+                    res = subprocess.run(cmd, capture_output=True, shell=True, text=True)
+                    print(f"${cmd}")
+                    print(res.stdout)
+                    if res.stderr:
+                        print(res.stderr)
+        elif commands[0] == "2":
+            for cmd in commands:
+                cmd = cmd.strip()
+                if cmd:
+                    res = subprocess.run(cmd, capture_output=True, shell=True, text=True)
+                    print(f"${cmd}")
+                    print(res.stdout)
+                    if res.stderr:
+                        print(res.stderr)
+        if  commands[0] == "0":
             print("Programa finalizado com sucesso!\nEncerrado o terminal . . .")
             break
+
