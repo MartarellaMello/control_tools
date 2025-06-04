@@ -21,7 +21,7 @@ if __name__ == "__main__":
             commands = str("git add .\n"
                            "git commit -m 'Mensagem personalizada'\n"
                            "git push origin main").split("&&")
-            txt = str(input("'Digite a mensagem de commit: '"))
+            txt = str(input("Digite a mensagem de commit: ")).split("&&")
             print(commands)
             commands = str(f"git add .\n"
                            f"git commit -m {txt}\n"
@@ -35,6 +35,7 @@ if __name__ == "__main__":
                     if res.stderr:
                         print(res.stderr)
         elif commands[0] == "2":
+            commands = str(input("Digite os comandos a serem executados: no git"))
             for cmd in commands:
                 cmd = cmd.strip()
                 if cmd:

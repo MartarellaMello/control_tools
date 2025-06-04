@@ -9,10 +9,9 @@ import warnings
 
 class Controle:
     # Variaveis globais da classe
-
     t = sp.Symbol('t')
     s = sp.Symbol('s')
-
+    compensador = 1 / s
     def __init__(self, coef_n, coef_d, constraint=0) -> None:
         self._constraint = constraint
 
@@ -57,30 +56,18 @@ class Controle:
 
         return self.info
 
-    def linear_comp(self, coef_n, coef_d):
 
-        h_s = ft_s(coef_n, coef_d)
-        self.info["Hs"] = h_s
-
-        if h_s.info["FT"] == 0:
-            warnings.warn("A funcao de transferencia H(s) e igual a zero")
-            return None
-        else:
-            print("H(s) = ", self.info["Hs"])
-
-        self.info["H_s"] = self.info["Hs"]
-        return h_s
-
-    def close_loop(self, h_s=1/s, plot=False):
+    def close_loop(self, compensador=1/s, plot=False):
         """
         Calcula o sistema de controle em malha fechada
         :param plot: Plota o grafico do sistema de controle em malha fechada
-        :param h_s: Funcao de controlador.
+        :param compensador: Funcao de controlador.
         :return: Retorna a funcao de transferencia do sistema de controle em malha fechada
         """
         s = sp.Symbol('s')
         ft = self.info["FT"]
-        ft_cl = ft / (1 + h_s * ft)
+        ft_cl = (ft * compensador) / (1 + ft * compensador)
+
         self.info["FT_cl"] = ft_cl
 
         if plot:
@@ -90,16 +77,48 @@ class Controle:
         return ft_cl
 
 
+class Compensador(Controle):
+    """
+    Classe que define o controlador de malha fechada
+    """
+
+    def __init__(self, coef_n, coef_d):
+        super().__init__(coef_n, coef_d)
+        self._ft = Controle(coef_n, coef_d)
+    @property
+    def ft(self):
+        return self._ft.ft
+
+    @property
+    def info(self):
+        return self._ft.info
+
+    @property
+    def view(self):
+        """
+        Exibe a funcao de transferencia do controlador
+        :return: None
+        """
+        txt = self.ft.ft
+        print("LaTex", sp.latex(txt))
+
+
 if __name__ == '__main__':
+    # Coef da funcao de transferencia
     n = (1, 4)
     d = (1, 5, 2)
+    # Coeficiente do controlador
+    nd = 21
+    dc = 12
 
     ft = Controle(n, d)
     ft.time_f()
-    ft.lugar_raizes(plot=True)
-    ft.step(plot=True)
-    ft.close_loop(plot=True)
+    ft.lugar_raizes(plot=False)
+    ft.step(plot=False)
 
+    h = Compensador(nd, dc)
+    print("H(s) = ", h.ft)
+    ft.close_loop(h.ft, plot=True)
 # teste = ft.step()
 
 

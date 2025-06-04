@@ -1,3 +1,2 @@
 from .functions import *
-# from .main import *
-
+from .Controle import *

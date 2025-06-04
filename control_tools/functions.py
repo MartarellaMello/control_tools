@@ -4,48 +4,83 @@ Principais funcooes para problemas de controle
 
 """
 from os import times, times_result
-
-import sympy as sp
 import numpy as np
 import matplotlib.pyplot as plt
 import warnings
 import sympy as sp
 import control
 
+
+def ft_setter(numerador: tuple, denominador: tuple) -> dict:
+    """
+    Retorna as informacoes da funcao de transferencia
+    :param numerador: Coeficientes do numerador da funcao de transferencia
+    :param denominador: Coeficientes do denominador da funcao de transferencia
+    :return: Retorna um dicionario com as informacoes da funcao de transferencia
+    """
+    s = sp.Symbol('s')
+    n = sum(c * s ** (len(numerador) - i - 1) for i, c in enumerate(numerador))
+    d = sum(c * s ** (len(denominador) - i - 1) for i, c in enumerate(denominador))
+    polos = sp.solve(d, s)
+    raiz = sp.solve(n, s)
+    wn = 0
+
+    for i in raiz:
+        wn += i ** 2
+
+    ft = n / d
+    ft = {
+        'FT': ft,
+        "Numerador": numerador,
+        "Denominador": denominador,
+        'Polos': polos,
+        'Raiz': raiz
+    }
+    return ft
+
 def ft_s(numerador, denominador):
     # Variaveis simbolicas
     s = sp.Symbol('s')
     n = 0
     d = 0
+
+    if type(denominador) == tuple and type(numerador) == tuple or type(denominador) == list and type(numerador) == list:
+        ft = ft_setter(numerador, denominador)
+        return ft
+
     # Verificacao do denominador
-    if denominador == 0:
+    elif denominador == 0:
         print('NAO SE PODE DIVIDIR POR ZERO!')
         return None
 
+    elif type(denominador) == float:
+        ft = ft_setter(numerador, (denominador))
+        return ft
+
+    elif type(numerador) == float:
+        ft = ft_setter(numerador, (denominador))
+        return ft
+
     else:
-        n = sum(c * s ** (len(numerador) - i - 1) for i, c in enumerate(numerador))
-        d = sum(c * s ** (len(denominador) - i - 1) for i, c in enumerate(denominador))
-
-
-        # Deterinando os polos do sistema
+        n = numerador * s ** 0
+        d = denominador * s ** 0
         polos = sp.solve(n, s)
-
         raiz = sp.solve(d, s)
         wn = 0
 
         for i in raiz:
             wn += i ** 2
 
-        ft = n * (d ** (-1))
+        ft = n / (d * s)
         ft = {
             'FT': ft,
-            "Numerador": numerador,
-            "Denominador": denominador,
+            "Numerador": n,
+            "Denominador": d,
             'Polos': polos,
             'Raiz': raiz
         }
 
-        return ft
+    return ft
 
 def get_coef(ft) -> tuple:
     """
@@ -61,8 +96,6 @@ def get_coef(ft) -> tuple:
     # Converte em lista os coeficientes do numerador e denominador
     coef_n = (float(c) for c in sp.Poly(n, s).all_coeffs())
     coef_d = (float(c) for c in sp.Poly(d, s).all_coeffs())
-
-
     return tuple(coef_n) ,tuple(coef_d)
 
 
@@ -105,8 +138,6 @@ def ft_t(funcao_transferencia, inicio=0, final=5, dt=200, plot=True):
     print(len(y))
     print(f"valores de y(t) da funcao F(s) = {ft_n}, implementados com sucesso")
 
-
-
     if plot:
         axis_size = x, y
         plt.plot(x, y, label=f'g(t) = {ft_n}')
@@ -120,10 +151,10 @@ def ft_t(funcao_transferencia, inicio=0, final=5, dt=200, plot=True):
 
     return time_values, y
 
-def locus_root(funcao_transferecia, plot=False) -> tuple:
+def locus_root(funcao_transferecia, plot=False) -> tuple or None:
     """
     Retorna o grafico do lugar das raizews para um funcao de transfecnia conhecida
-    :param coefs: Coeficientes da  Funcao de transferencia. Deve ser no do tipo tupla ou lista
+    :param funcao_transferecia: Deve ser do tipo sympy ou control.TransferFunction
     :return: None
     """
 

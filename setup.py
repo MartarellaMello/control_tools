@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="control_tools",  # Nome do pacote no PyPI
-    version="0.2.2",  # Versão do seu pacote
+    version="0.2.21",  # Versão do seu pacote
     packages=find_packages(),  # Automaticamente encontra subpacotes
     install_requires=["sympy", "numpy", "matplotlib", "control"], # Dependências (ex: ["numpy"])
     author="Felipe Martarella de Souza Mello",
