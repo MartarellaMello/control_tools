@@ -125,6 +125,10 @@ def ft_t(funcao_transferencia, inicio=0, final=5, dt=200, plot=True):
     """
     t = sp.Symbol('t')
     s = sp.Symbol('s')
+    ft_n = sp.apart(funcao_transferencia, s, full=True)  # Separa a funcao de transferencia em termos parciais
+    print(ft_n)
+
+    # Realiza a transformada inversa de Laplace
     ft_n = sp.inverse_laplace_transform(funcao_transferencia, s ,t)
     time_values = np.linspace((inicio, final), dt, dtype=np.complex128)
     y = []
@@ -135,12 +139,15 @@ def ft_t(funcao_transferencia, inicio=0, final=5, dt=200, plot=True):
         y.append(ft_n.subs(t, comp))
         x.append(i)
 
-    print(len(y))
+    y_r = [sp.re(i) for i in y]  # Extrair a parte real
+    y_i = [sp.im(i) for i in y]  # Extrai a parte imginaria
+
     print(f"valores de y(t) da funcao F(s) = {ft_n}, implementados com sucesso")
 
     if plot:
-        axis_size = x, y
-        plt.plot(x, y, label=f'g(t) = {ft_n}')
+        # Plota o grafico da funcao de transferencia
+        plt.figure(1)
+        plt.plot(x, y_r, label=f'g(t) Parte real')
         plt.xlabel('Tempo (s)')
         plt.ylabel('g(t)')
         plt.title(f'Funcao {funcao_transferencia}')
@@ -181,8 +188,11 @@ def locus_root(funcao_transferecia, plot=False) -> tuple or None:
     ft_control = control.TransferFunction(coef[0], coef[1])
     print(f"Função de transferência: {ft_control}")
     # Plote o root locus
+
+    rlist, klist = control.root_locus_map(ft_control)
+
     if plot:
-        rlist, klist = control.root_locus(ft_control, plot=True, xlim=(x_min, x_max), ylim=(y_min, y_max))
+        rlist, klist = control.root_locus_plot(ft_control, plot=True, xlim=(x_min, x_max), ylim=(y_min, y_max))
         plt.title("Lugar das raízes (Root Locus)")
         plt.xlabel("Parte Real")
         plt.ylabel("Parte Imaginária")

@@ -7,8 +7,8 @@ import subprocess
 
 
 if __name__ == "__main__":
-    print("Selecione uma das opcoes de atualizacao abaixo:\n"
-          "1 - Atualizar git hub padrao (git push origin main)\n")
+    print("Selecione uma das opcoes de atualizacao abaixo:\n\n"
+          "1 - Atualizar git hub padrao (git push origin main)")
     print("2 - Acessar diretamente o terminal e inserir os comandos manualmente\n"
           "0 - Para sair a qualquer momento do programa. . .\n")
     commands = 7
