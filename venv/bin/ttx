@@ -1,4 +1,4 @@
-#!/home/fmartarella/Controle/venv/bin/python3
+#!/home/martarellapc/PycharmProjects/control_tools/venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys

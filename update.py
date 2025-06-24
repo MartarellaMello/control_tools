@@ -1,5 +1,8 @@
 """
-File to made updates to the database.
+This script allows you to update a GitHub repository by adding, committing, and pushing changes.
+If was the first time you are using git, you need to set your user name and email, command below:
+    git config --global user.email "you@example.com"
+    git config --global user.name "Your Name"
 
 """
 
@@ -7,7 +10,7 @@ import subprocess
 
 
 if __name__ == "__main__":
-    print("Selecione uma das opcoes de atualizacao abaixo:\n\n"
+    print("Selecione uma das opcoes de atualizacao abaixo:\n"
           "1 - Atualizar git hub padrao (git push origin main)")
     print("2 - Acessar diretamente o terminal e inserir os comandos manualmente\n"
           "0 - Para sair a qualquer momento do programa. . .\n")
@@ -35,7 +38,7 @@ if __name__ == "__main__":
                     if res.stderr:
                         print(res.stderr)
         elif commands[0] == "2":
-            commands = str(input("Digite os comandos a serem executados: no git"))
+            commands = str(input("Digite os comandos a serem executados:"))
             for cmd in commands:
                 cmd = cmd.strip()
                 if cmd:
@@ -47,4 +50,6 @@ if __name__ == "__main__":
         if  commands[0] == "0":
             print("Programa finalizado com sucesso!\nEncerrado o terminal . . .")
             break
+
+
 
