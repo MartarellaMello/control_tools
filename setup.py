@@ -8,7 +8,7 @@ setup(
     author="Felipe Martarella de Souza Mello",
     author_email="d2020001214@unifei.edu.br",
     description="Pacote designado para solucao de problemas classico de controle.",
-    #url="https://github.com/seuusuario/controls_tools",  # Opcional, ajuste para seu repositório
+    url="https://github.com/MartarellaMello/control_tools",
     classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
