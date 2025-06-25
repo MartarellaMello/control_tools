@@ -1,4 +1,7 @@
+LICENSE
+README.md
 setup.py
+control_tools/Controle.py
 control_tools/__init__.py
 control_tools/functions.py
 control_tools.egg-info/PKG-INFO

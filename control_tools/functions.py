@@ -8,27 +8,46 @@ import numpy as np
 import matplotlib.pyplot as plt
 import warnings
 import sympy as sp
-import control
+import control as ct
 
 
-def ft_setter(numerador: tuple, denominador: tuple) -> dict:
+def ft_setter(numerador: list, denominador: list) -> dict:
     """
     Retorna as informacoes da funcao de transferencia
     :param numerador: Coeficientes do numerador da funcao de transferencia
     :param denominador: Coeficientes do denominador da funcao de transferencia
-    :return: Retorna um dicionario com as informacoes da funcao de transferencia
+    :return: Retorna um dicionario com as informacoes da funcao de transferencia.
+
+    Formato do dicionario:
+    return: dict
+        {
+        'FT': Funcao de transferencia,
+        "Numerador": Coeficientes do numerador,
+        "Denominador": Coeficientes do denominador,
+        'Polos': Polos da funcao de transferencia,
+        'Raiz': Raizes da funcao de transferencia
+        }
+
+    return['FT'] --> retorna a funcao de transferencia. O tipo de dado é control.TransferFunction
+    return['Numerador'] --> Retorna os coeficientes do numerador da funcao de transferencia
+    return['Denominador'] --> Retorna os coeficientes do denominador da funcao de transferencia
+    return['Polos'] --> Retorna os polos da funcao de transferencia
+    return['Raiz'] --> Retorna as raizes da funcao de transferencia
     """
-    s = sp.Symbol('s')
-    n = sum(c * s ** (len(numerador) - i - 1) for i, c in enumerate(numerador))
-    d = sum(c * s ** (len(denominador) - i - 1) for i, c in enumerate(denominador))
-    polos = sp.solve(d, s)
-    raiz = sp.solve(n, s)
+
+    # Checa se o numerador e denominador sao listas
+    if isinstance(numerador, tuple) or isinstance(denominador, tuple):
+        numerador = list(numerador)
+        denominador = list(denominador)
+
+    polos = np.roots(list(numerador))  # Calcula os polos do numerador
+    raiz = np.roots(list(denominador))
     wn = 0
 
     for i in raiz:
         wn += i ** 2
 
-    ft = n / d
+    ft = ct.TransferFunction(numerador, denominador)
     ft = {
         'FT': ft,
         "Numerador": numerador,
@@ -36,50 +55,6 @@ def ft_setter(numerador: tuple, denominador: tuple) -> dict:
         'Polos': polos,
         'Raiz': raiz
     }
-    return ft
-
-def ft_s(numerador, denominador):
-    # Variaveis simbolicas
-    s = sp.Symbol('s')
-    n = 0
-    d = 0
-
-    if type(denominador) == tuple and type(numerador) == tuple or type(denominador) == list and type(numerador) == list:
-        ft = ft_setter(numerador, denominador)
-        return ft
-
-    # Verificacao do denominador
-    elif denominador == 0:
-        print('NAO SE PODE DIVIDIR POR ZERO!')
-        return None
-
-    elif type(denominador) == float:
-        ft = ft_setter(numerador, (denominador))
-        return ft
-
-    elif type(numerador) == float:
-        ft = ft_setter(numerador, (denominador))
-        return ft
-
-    else:
-        n = numerador * s ** 0
-        d = denominador * s ** 0
-        polos = sp.solve(n, s)
-        raiz = sp.solve(d, s)
-        wn = 0
-
-        for i in raiz:
-            wn += i ** 2
-
-        ft = n / (d * s)
-        ft = {
-            'FT': ft,
-            "Numerador": n,
-            "Denominador": d,
-            'Polos': polos,
-            'Raiz': raiz
-        }
-
     return ft
 
 def get_coef(ft) -> tuple:
@@ -113,95 +88,48 @@ def select(conds, choices, default=None):
     return out
 
 
-def ft_t(funcao_transferencia, inicio=0, final=5, dt=200, plot=True):
+def ft_t(funcao_transferencia, plot=False):
     """
-    :param funcao_transferencia: A funcao de transferencia G(s) em symbol
-    :param inicio: O tempo de inicio da construcao do grafico
-    :param final: Fim tempo de construcao do grafico
-    :param dt: Espaacmento entre intervalo de dado
+    :param funcao_transferencia: A funcao de transferencia G(s) type: control.TransferFunction
     :param plot: True ou False
     :return: Retorna a funcao matecamica  g(t) e plota o grafico da funcao
 
     """
-    t = sp.Symbol('t')
-    s = sp.Symbol('s')
-    ft_n = sp.apart(funcao_transferencia, s, full=True)  # Separa a funcao de transferencia em termos parciais
-    print(ft_n)
+    # Calcula a resposnta no tempo da funcao de transferencia....
+    t, y = ct.step_response(funcao_transferencia)
 
-    # Realiza a transformada inversa de Laplace
-    ft_n = sp.inverse_laplace_transform(funcao_transferencia, s ,t)
-    time_values = np.linspace((inicio, final), dt, dtype=np.complex128)
-    y = []
-    x = []
-
-    for i in time_values:
-        comp = i[0] + i[1]
-        y.append(ft_n.subs(t, comp))
-        x.append(i)
-
-    y_r = [sp.re(i) for i in y]  # Extrair a parte real
-    y_i = [sp.im(i) for i in y]  # Extrai a parte imginaria
-
-    print(f"valores de y(t) da funcao F(s) = {ft_n}, implementados com sucesso")
-
+    # Criando o Plot, caso seja solicitado pelo usuario
     if plot:
         # Plota o grafico da funcao de transferencia
-        plt.figure(1)
-        plt.plot(x, y_r, label=f'g(t) Parte real')
+        plt.plot(t, y)
         plt.xlabel('Tempo (s)')
         plt.ylabel('g(t)')
-        plt.title(f'Funcao {funcao_transferencia}')
+        plt.title(f'Resposta ao Degrau de {funcao_transferencia}')
         plt.grid(True)
         plt.show()
     else:
-        return time_values, y
+        return t, y
 
-    return time_values, y
+    return t, y
 
-def locus_root(funcao_transferecia, plot=False) -> tuple or None:
+def root_locus(funcao_transferecia, plot=False) -> tuple or None:
     """
     Retorna o grafico do lugar das raizews para um funcao de transfecnia conhecida
     :param funcao_transferecia: Deve ser do tipo sympy ou control.TransferFunction
+    :param plot: Se True, plota o grafico do lugar das raizes, caso contrario, retorna apenas os valores de r e k
     :return: None
     """
-
-    # Defina s como símbolo único
-
-    s = sp.symbols('s')
-    # Simplifique e separe numerador e denominador
-    # Calculo do lugar das raizes
-    coef = get_coef(funcao_transferecia)
-
-    margin = np.sqrt(sum(coef[1]))  # Adjust as needed
-    x_min = margin - margin
-    x_max = margin
-    y_min = - margin
-    y_max = 1
-
-
-    # Verifica se o coeficiente é vazio ou nulo
-    if not coef or coef[0] == 0 or coef[1] == 0:
-        warnings.warn("A funcao de transferencia G(s) nao pode ser zero")
-        return None
-
-    # Cria a funcao de transferencia usando a biblioteca control
-    ft_control = control.TransferFunction(coef[0], coef[1])
-    print(f"Função de transferência: {ft_control}")
-    # Plote o root locus
-
-    rlist, klist = control.root_locus_map(ft_control)
+    r, k = ct.root_locus_map(funcao_transferecia)
 
     if plot:
-        rlist, klist = control.root_locus_plot(ft_control, plot=True, xlim=(x_min, x_max), ylim=(y_min, y_max))
+        ct.root_locus_plot(funcao_transferecia)
         plt.title("Lugar das raízes (Root Locus)")
         plt.xlabel("Parte Real")
         plt.ylabel("Parte Imaginária")
         plt.grid(True)
         plt.show()
-    else:
-        rlist, klist = control.root_locus(ft_control, plot=False)
 
-    return rlist, klist
+    return r, k
 
 
 

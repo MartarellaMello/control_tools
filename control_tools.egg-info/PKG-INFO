@@ -1,19 +1,22 @@
 Metadata-Version: 2.4
 Name: control_tools
-Version: 0.1.7
+Version: 0.2.22
 Summary: Pacote designado para solucao de problemas classico de controle.
 Author: Felipe Martarella de Souza Mello
 Author-email: d2020001214@unifei.edu.br
 Classifier: Programming Language :: Python :: 3
 Classifier: Operating System :: OS Independent
 Requires-Python: >=3.6
+License-File: LICENSE
 Requires-Dist: sympy
 Requires-Dist: numpy
 Requires-Dist: matplotlib
 Requires-Dist: control
+Requires-Dist: setuptools
 Dynamic: author
 Dynamic: author-email
 Dynamic: classifier
+Dynamic: license-file
 Dynamic: requires-dist
 Dynamic: requires-python
 Dynamic: summary

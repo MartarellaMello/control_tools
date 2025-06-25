@@ -12,11 +12,12 @@ class Controle:
     t = sp.Symbol('t')
     s = sp.Symbol('s')
     compensador = 1 / s
+
     def __init__(self, coef_n, coef_d, constraint=0) -> None:
         self._constraint = constraint
+        transfer_function = ft_setter(coef_n, coef_d)
 
-        ft = ft_s(coef_n, coef_d)
-        self._ft = ft
+        self._ft = transfer_function
 
     @property
     def ft(self):
@@ -30,49 +31,37 @@ class Controle:
     def info(self):
         return self._ft
 
-    @property
-    def view(self):
-        txt = self.info["FT"]
-        print("LaTex", sp.latex(txt))
 
-    def time_f(self, plot=True):
-        ft = self.info["FT"]
-        ft_n = ft_t(ft, 0, 50, plot)
-        self.info["f_time"] = ft_n
+    def step(self, plot=False):
+        """
+        Calcula a resposta ao degrau do sistema de controle
+        :param plot: True se deseja plotar o grafico da resposta ao degrau
+        :return: Retorna a resposta ao degrau do sistema de controle com ou sem o grafico. Alem disso, armazena a
+        resposta ao degrau no dicionario info com a chave "step".
+        """
+        transfer_function = self.info["FT"]
+        ft_n = ft_t(transfer_function, plot)
+        self.info["step"] = ft_n
         return ft_n
 
     def lugar_raizes(self, plot=False):
-        r, k = locus_root(self.info["FT"], plot)
+        r, k = root_locus(self.info["FT"], plot)
         return r, k
 
-    def step(self, plot=False):
-        s = sp.Symbol("s")
-        self.info["FT"] = self.info["FT"] * (s ** (-1))
 
-        ft_t = self.time_f(plot)
-        ft_root = self.lugar_raizes(plot)
-        self.info["step_Ans"] = ft_t
-        self.info["Root_locus"] = ft_root
-
-        return self.info
-
-
-    def close_loop(self, compensador=1/s, plot=False):
+    def close_loop(self, compensador, plot=False):
         """
         Calcula o sistema de controle em malha fechada
         :param plot: Plota o grafico do sistema de controle em malha fechada
         :param compensador: Funcao de controlador.
-        :return: Retorna a funcao de transferencia do sistema de controle em malha fechada
-        """
-        s = sp.Symbol('s')
-        ft = self.info["FT"]
-        ft_cl = (ft * compensador) / (1 + ft * compensador)
-
-        self.info["FT_cl"] = ft_cl
-
-        if plot:
-            ft_t(ft_cl, 0, 50, plot)
-            return ft_cl
+        :return: Retorna a funcao de transferencia do sistema de controle em malha fechada. Alem disso, armazena os
+        resultados no dicionario info comas chaves "MF" -> funcao de transferencia para malha fechada e
+        "MF_step" --> indica a resposta do sistema a um degral unitario.
+         """
+        c_loop = ct.feedback(self.ft, compensador)
+        ft_cl = ft_t(c_loop, plot)
+        self.info["MF"] = c_loop
+        self.info["MF_step"] = ft_cl
 
         return ft_cl
 
@@ -93,32 +82,23 @@ class Compensador(Controle):
     def info(self):
         return self._ft.info
 
-    @property
-    def view(self):
-        """
-        Exibe a funcao de transferencia do controlador
-        :return: None
-        """
-        txt = self.ft.ft
-        print("LaTex", sp.latex(txt))
-
 
 if __name__ == '__main__':
     # Coef da funcao de transferencia
-    n = (1, 4)
-    d = (1, 5, 2)
+    n = 25,
+    d = (1, 4 ,24)
     # Coeficiente do controlador
     nd = 21
     dc = 12
 
     ft = Controle(n, d)
-    ft.time_f()
-    ft.lugar_raizes(plot=False)
-    ft.step(plot=False)
+    ft.step(plot=True)
+    ft.lugar_raizes(plot=True)
+    # ft.step(plot=False)
 
-    h = Compensador(nd, dc)
-    print("H(s) = ", h.ft)
-    ft.close_loop(h.ft, plot=True)
+    # h = Compensador(nd, dc)
+    # print("H(s) = ", h.ft)
+    # ft.close_loop(h.ft, plot=True)
 # teste = ft.step()
 
 
